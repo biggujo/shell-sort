@@ -1,3 +1,16 @@
 # ninja log v5
-0	57	6919726371677745	CMakeFiles/shell_sort_course_work.dir/main.c.obj	2c96698adfcae6f7
-58	145	6919726372527771	shell_sort_course_work.exe	6d90c8c064b9929f
+65	149	6919801025808323	shell_sort_course_work.exe	6928168bddbff92c
+2	65	6919801025008346	CMakeFiles/shell_sort_course_work.dir/main.c.obj	9b78dfe25f7b563c
+1	76	6919757403018945	CMakeFiles/shell_sort_course_work.dir/lib/myAlloc.c.obj	99e07fd6daaf4ac9
+1	95	6919818778510151	build.ninja	c53d1b06496e44ea
+5	95	6919750405647406	CMakeFiles/shell_sort_course_work.dir/lib/myTime.c.obj	988c09a49eadb8c3
+6	100	6919750405707428	CMakeFiles/shell_sort_course_work.dir/lib/myInput.c.obj	c513eb22f07f3e45
+4	93	6919761487705895	CMakeFiles/shell_sort_course_work.dir/libUtils/myTime.c.obj	f0e0b0ab02536d7c
+1	78	6919757532727676	CMakeFiles/shell_sort_course_work.dir/lib/myArray.c.obj	fda56a76bc0c0f06
+4	74	6919800885553374	CMakeFiles/shell_sort_course_work.dir/libSort/shellSort.c.obj	6a54639909b89972
+7	93	6919761487715818	CMakeFiles/shell_sort_course_work.dir/libUtils/myAlloc.c.obj	7c65c00021e9d7cc
+3	97	6919761487755794	CMakeFiles/shell_sort_course_work.dir/libUtils/myArray.c.obj	d6517eae22e9ab9b
+8	97	6919761487765816	CMakeFiles/shell_sort_course_work.dir/libUtils/myInput.c.obj	cc8c2a38c2230b0c
+6	88	6919791689968945	CMakeFiles/shell_sort_course_work.dir/libSort/insertionSort.c.obj	514804dfc8ce1e8f
+4	74	6919791689838938	CMakeFiles/shell_sort_course_work.dir/libUtils/myFiles.c.obj	c157571d50dcb729
+2	86	6919791689949036	CMakeFiles/shell_sort_course_work.dir/libUtils/myTimer.c.obj	2041585a8b88174e
