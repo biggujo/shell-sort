@@ -8,6 +8,11 @@ void arrFillRand(int *arr, int size, int min, int max);
 // Fill array with ascending row
 void arrFillDesc(int *arr, int size);
 
+// Copy array
+void copyArr(int src[], int *dest, int size);
+// Reverse an array
+void reverseArr(int *arr, int size);
+
 // Print 1D-array
 void arrPrint(int *arr, int size);
 

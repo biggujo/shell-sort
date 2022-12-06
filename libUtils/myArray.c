@@ -57,3 +57,18 @@ void copyArr(int src[], int *dest, int size) {
         dest[i] = src[i];
     }
 }
+
+// Reverse an array
+void reverseArr(int *arr, int size) {
+
+    int tmp;
+    int i;
+
+    for(i = 0; i < size / 2; i++) {
+
+        // Swap
+        tmp = arr[i];
+        arr[i] = arr[size - i - 1];
+        arr[size - i - 1] = tmp;
+    }
+}
