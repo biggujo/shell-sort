@@ -1,11 +1,8 @@
 #include <stdio.h>
 #include <conio.h>
 #include <stdlib.h>
-
-#include "libUtils/myArray.h"
-#include "libUtils/myTimer.h"
-#include "libUtils/myInput.h"
-#include "libUtils/myAlloc.h"
+#include <string.h>
+#include <sys/time.h>
 
 #define FILE_SHELL1959_TIME_MS      "Shell1959TimeMs.csv"
 #define FILE_SHELL1959_COMP         "Shell1959Comp.csv"
@@ -60,6 +57,22 @@ int readArraysFromFiles(Array **arrAsc, Array **arrRand, Array **arrDesc, int si
 // Generate arrays, save into files
 int generateArraysToFiles(int size);
 
+// Try to calloc array
+int* mallocArrInt(int desiredSize);
+
+// Fill array with ascending row
+void arrFillAsc(int *arr, int size);
+// Fill array with random numbers
+void arrFillRand(int *arr, int size, int min, int max);
+// Fill array with ascending row
+void arrFillDesc(int *arr, int size);
+// Print 1D-array
+void arrPrint(int *arr, int size);
+// Copy array
+void copyArr(int src[], int *dest, int size);
+// Reverse an array
+void reverseArr(int *arr, int size);
+
 // Count lines in file
 int fileCountLines(char *filename);
 // Read int array from text file
@@ -68,57 +81,281 @@ int* arrReadFromFile(int *arr, int *size, char *filename);
 // Return: 0 - OK, -1 - error
 int arrWriteToFile(int arr[], int size, char *filename);
 
-int isAllocated(void *ptr);
+int inputInt(int min, int max);
+
+void startTimer();
+double stopTimer();
+
 void pressAnyKey();
 void clrScr();
 
 #define PROGRAM_HEADER "SHELL AND INSERTION COMPARISON TESTS"
 
+// For timer
+clock_t start_t;
+clock_t end_t;
+
+// For tests
 static int comparisons = 0;
 static int swaps = 0;
 
 int main(void) {
 
-    int size = 1000000;
-    int step = size / 10;
-
-    int *arr = NULL;
-    int *tmp = NULL;
-
-
     Array *arrAsc = NULL;
     Array *arrRand = NULL;
     Array *arrDesc = NULL;
 
-    if (readArraysFromFiles(&arrAsc, &arrRand, &arrDesc, size)) {
-
-        printf("Allocation error!\n");
-    }
+    Array *tmpArray = NULL;
 
 //    generateArraysToFiles(size);
-    testShellRowShell1959(arrAsc, arrRand, arrDesc, size, step);
-    testShellRowSedgewick1982(arrAsc, arrRand, arrDesc, size, step);
-    testShellRowSedgewick1986(arrAsc, arrRand, arrDesc, size, step);
-    testShellRowCiura2001(arrAsc, arrRand, arrDesc, size, step);
+
 //    testInsertionSort(arrAsc, arrRand, arrDesc, size, step);
-    puts("Done!");
 
-    getchar();
-    getchar();
+    int size;
 
-//    if (arrAsc) {
-//        free(arrAsc->arr);
-//        free(arrAsc);
-//    }
-//    if (arrRand) {
-//        free(arrRand->arr);
-//        free(arrRand);
-//    }
-//    if (arrDesc) {
-//        free(arrDesc->arr);
-//        free(arrDesc);
-//    }
-    return 0;
+    while (1) {
+
+        clrScr();
+        printf("Please, choose what to do:\n");
+        printf("1 - Print sequence of Shell, 1959\n");
+        printf("2 - Print sequence of Sedgewick, 1982\n");
+        printf("3 - Print sequence of Sedgewick, 1986\n");
+        printf("4 - Print sequence of Ciura, 2001\n");
+        printf("5 - Test Shell Sort (4 tests)\n");
+        printf("6 - Test Insertion Sort (1 test, can be long)\n");
+        printf("7 - Generate new arrays\n");
+        printf("0 - Exit\n");
+
+        switch (getch()) {
+
+            // 1 - Print sequence of Shell, 1959
+            case '1':
+
+                clrScr();
+
+                printf("1 - Print sequence of Shell, 1959\n\n");
+
+                printf("Please, enter a size of array:\n");
+                size = inputInt(50, 1000000);
+
+                clrScr();
+
+                printf("1 - Print sequence of Shell, 1959\n\n");
+                printf("Size: %d\n\n", size);
+
+                tmpArray = rowShell1959(size);
+
+                puts("Sequence:\n");
+                arrPrint(&tmpArray->arr[0], tmpArray->size);
+                puts("");
+
+                pressAnyKey();
+                break;
+
+            // 2 - Print sequence of Sedgewick, 1982
+            case '2':
+
+                clrScr();
+
+                printf("2 - Print sequence of Sedgewick, 1982\n\n");
+
+                printf("Please, enter a size of array:\n");
+                size = inputInt(50, 1000000);
+
+                clrScr();
+
+                printf("2 - Print sequence of Sedgewick, 1982\n\n");
+                printf("Size: %d\n\n", size);
+
+                tmpArray = rowSedgewick1982(size);
+
+                puts("Sequence:\n");
+                arrPrint(&tmpArray->arr[0], tmpArray->size);
+                puts("");
+
+                pressAnyKey();
+                break;
+
+            // 3 - Print sequence of Sedgewick, 1986
+            case '3':
+
+                clrScr();
+
+                printf("3 - Print sequence of Sedgewick, 1986\n\n");
+
+                printf("Please, enter a size of array:\n");
+                size = inputInt(50, 1000000);
+
+                clrScr();
+
+                printf("3 - Print sequence of Sedgewick, 1986\n\n");
+                printf("Size: %d\n\n", size);
+
+                tmpArray = rowSedgewick1986(size);
+
+                puts("Sequence:\n");
+                arrPrint(&tmpArray->arr[0], tmpArray->size);
+                puts("");
+
+                pressAnyKey();
+                break;
+
+            // 4 - Print sequence of Ciura, 2001
+            case '4':
+
+                clrScr();
+
+                printf("4 - Print sequence of Ciura, 2001\n\n");
+
+                printf("Please, enter a size of array:\n");
+                size = inputInt(50, 701);
+
+                clrScr();
+
+                printf("4 - Print sequence of Ciura, 2001\n\n");
+                printf("Size: %d\n\n", size);
+
+                tmpArray = rowCiura2001(size);
+
+                puts("Sequence:\n");
+                arrPrint(&tmpArray->arr[0], tmpArray->size);
+                puts("");
+
+                pressAnyKey();
+                break;
+
+            // 5 - Test Shell Sort (4 tests)
+            case '5':
+
+                clrScr();
+
+                printf("5 - Test Shell Sort (4 tests)\n\n");
+
+                printf("Start (y/n)?\n");
+
+                if (getch() != 'y') break;
+
+                clrScr();
+
+                printf("5 - Test Shell Sort (4 tests)\n\n");
+
+                printf("Please, enter a size of array:\n");
+                size = inputInt(50, 1000000);
+
+                if (!arrAsc && !arrRand && !arrDesc) {
+
+                    if (readArraysFromFiles(&arrAsc, &arrRand, &arrDesc, size)) {
+
+                        printf("Allocation error!\n");
+                    }
+                }
+
+                printf("Files:\n");
+                printf("%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n\n", FILE_SHELL1959_TIME_MS, FILE_SHELL1959_COMP,
+                       FILE_SHELL1959_SWAP, FILE_SEDGEWICK1982_TIME_MS, FILE_SEDGEWICK1982_COMP, FILE_SEDGEWICK1982_SWAP,
+                       FILE_SEDGEWICK1986_TIME_MS, FILE_SEDGEWICK1986_COMP, FILE_SEDGEWICK1986_SWAP,
+                       FILE_CIURA2001_TIME_MS, FILE_CIURA2001_COMP, FILE_CIURA2001_SWAP);
+
+                puts("Starting...");
+
+                puts("Shell, 1959 sequence: start");
+                testShellRowShell1959(arrAsc, arrRand, arrDesc, size, size / 10);
+                puts("Shell sequence done!");
+                puts("Sedgewick, 1982 sequence: start");
+                testShellRowSedgewick1982(arrAsc, arrRand, arrDesc, size, size / 10);
+                puts("Sedgewick, 1982 sequence: done!");
+                puts("Sedgewick, 1986 sequence: start");
+                testShellRowSedgewick1986(arrAsc, arrRand, arrDesc, size, size / 10);
+                puts("Sedgewick, 1986 sequence: done!");
+                puts("Ciura, 2001 sequence: start");
+                testShellRowCiura2001(arrAsc, arrRand, arrDesc, size, size / 10);
+                puts("Ciura, 2001 sequence: done");
+                puts("Done!");
+
+                puts("");
+                pressAnyKey();
+                break;
+
+            // 6 - Test Insertion Sort
+            case '6':
+
+                clrScr();
+
+                printf("6 - Test Insertion Sort\n\n");
+
+                printf("Start (y/n)?\n");
+
+                if (getch() != 'y') break;
+
+                clrScr();
+
+                printf("6 - Test Insertion Sort\n\n");
+
+                printf("Please, enter a size of array:\n");
+                size = inputInt(50, 1000000);
+
+                if (!arrAsc && !arrRand && !arrDesc) {
+
+                    if (readArraysFromFiles(&arrAsc, &arrRand, &arrDesc, size)) {
+
+                        printf("Allocation error!\n");
+                    }
+                }
+
+                printf("Files:\n");
+                printf("%s, %s, %s\n\n", FILE_INSERTION_TIME_MS, FILE_INSERTION_COMP, FILE_INSERTION_SWAP);
+
+                puts("Starting...");
+
+                puts("Shell, 1959 sequence: start");
+                testInsertionSort(arrAsc, arrRand, arrDesc, size, size / 10);
+                puts("Shell sequence done!");
+                puts("Done!");
+
+                puts("");
+                pressAnyKey();
+                break;
+
+            // 7 - Generate new arrays
+            case '7':
+
+                clrScr();
+
+                printf("7 - Generate new arrays\n\n");
+
+                printf("Files:\n");
+                printf("%s, %s, %s\n\n", FILE_ARRAY_ASC, FILE_ARRAY_RAND, FILE_ARRAY_DESC);
+
+                printf("Please, enter a size of new arrays:\n");
+
+                size = inputInt(50, 1000000);
+
+                puts("Generating...");
+                generateArraysToFiles(size);
+                puts("Done!");
+
+                puts("");
+                pressAnyKey();
+                break;
+
+            // Exit
+            case '0':
+                printf("Are you sure (y/n): ");
+
+                if (getch() == 'y') {
+
+                    if (arrAsc) free((*arrAsc).arr);
+                    free(arrAsc);
+                    free((*arrRand).arr);
+                    free(arrRand);
+                    free((*arrDesc).arr);
+                    free(arrDesc);
+
+                    return 0;
+                } else clrScr();
+        }
+
+    }
 }
 
 void testShellRowShell1959(Array *arrAsc, Array *arrRand, Array *arrDesc, int size, int step) {
@@ -129,7 +366,7 @@ void testShellRowShell1959(Array *arrAsc, Array *arrRand, Array *arrDesc, int si
 
     // Try to allocate array copy
     tmpAlloc = mallocArrInt(size);
-    if (!isAllocated(tmpAlloc)) {
+    if (!tmpAlloc) {
 
         printf("Allocation error!\n");
         return;
@@ -222,6 +459,10 @@ void testShellRowShell1959(Array *arrAsc, Array *arrRand, Array *arrDesc, int si
     }
 
     free(arrCopy);
+    free(tmpAlloc);
+
+    arrCopy = NULL;
+    tmpAlloc = NULL;
 
     fclose(fileTime);
     fclose(fileComp);
@@ -236,7 +477,7 @@ void testShellRowSedgewick1982(Array *arrAsc, Array *arrRand, Array *arrDesc, in
 
     // Try to allocate array copy
     tmpAlloc = mallocArrInt(size);
-    if (!isAllocated(tmpAlloc)) {
+    if (!tmpAlloc) {
 
         printf("Allocation error!\n");
         return;
@@ -330,6 +571,10 @@ void testShellRowSedgewick1982(Array *arrAsc, Array *arrRand, Array *arrDesc, in
     }
 
     free(arrCopy);
+    free(tmpAlloc);
+
+    arrCopy = NULL;
+    tmpAlloc = NULL;
 
     fclose(fileTime);
     fclose(fileComp);
@@ -344,7 +589,7 @@ void testShellRowSedgewick1986(Array *arrAsc, Array *arrRand, Array *arrDesc, in
 
     // Try to allocate array copy
     tmpAlloc = mallocArrInt(size);
-    if (!isAllocated(tmpAlloc)) {
+    if (!tmpAlloc) {
 
         printf("Allocation error!\n");
         return;
@@ -438,6 +683,10 @@ void testShellRowSedgewick1986(Array *arrAsc, Array *arrRand, Array *arrDesc, in
     }
 
     free(arrCopy);
+    free(tmpAlloc);
+
+    arrCopy = NULL;
+    tmpAlloc = NULL;
 
     fclose(fileTime);
     fclose(fileComp);
@@ -452,7 +701,7 @@ void testShellRowCiura2001(Array *arrAsc, Array *arrRand, Array *arrDesc, int si
 
     // Try to allocate array copy
     tmpAlloc = mallocArrInt(size);
-    if (!isAllocated(tmpAlloc)) {
+    if (!tmpAlloc) {
 
         printf("Allocation error!\n");
         return;
@@ -546,6 +795,10 @@ void testShellRowCiura2001(Array *arrAsc, Array *arrRand, Array *arrDesc, int si
     }
 
     free(arrCopy);
+    free(tmpAlloc);
+
+    arrCopy = NULL;
+    tmpAlloc = NULL;
 
     fclose(fileTime);
     fclose(fileComp);
@@ -560,7 +813,7 @@ void testInsertionSort(Array *arrAsc, Array *arrRand, Array *arrDesc, int size, 
 
     // Try to allocate array copy
     tmpAlloc = mallocArrInt(size);
-    if (!isAllocated(tmpAlloc)) {
+    if (!tmpAlloc) {
 
         printf("Allocation error!\n");
         return;
@@ -762,7 +1015,7 @@ Array* rowSedgewick1982(int size) {
     int num2 = 3;
 
     gap->arr[0] = 1;
-    for (i = 1; num1 + num2 + 1 < size; num1 *= 4, num2 *= 2, i++) {
+    for (i = 1; num1 + num2 + 1 <= size; num1 *= 4, num2 *= 2, i++) {
 
         if (i == curSize) {
 
@@ -909,7 +1162,7 @@ int readArraysFromFiles(Array **arrAsc, Array **arrRand, Array **arrDesc, int si
     *arrRand = (Array *) calloc(1, sizeof(Array));
     *arrDesc = (Array *) calloc(1, sizeof(Array));
 
-    if (!arrAsc || !arrRand || !arrDesc) {
+    if (!(*arrAsc) || !(*arrRand) || !(*arrDesc)) {
 
         return 1;
     }
@@ -920,7 +1173,7 @@ int readArraysFromFiles(Array **arrAsc, Array **arrRand, Array **arrDesc, int si
 
     // Allocate array by ascending
     tmpAlloc = mallocArrInt(size);
-    if (!isAllocated(tmpAlloc)) {
+    if (!tmpAlloc) {
 
         printf("Allocation error!\n");
         return 1;
@@ -933,7 +1186,7 @@ int readArraysFromFiles(Array **arrAsc, Array **arrRand, Array **arrDesc, int si
 
     // Allocate array by ascending
     tmpAlloc = mallocArrInt(size);
-    if (!isAllocated(tmpAlloc)) {
+    if (!tmpAlloc) {
 
         printf("Allocation error!\n");
         return 1;
@@ -946,7 +1199,7 @@ int readArraysFromFiles(Array **arrAsc, Array **arrRand, Array **arrDesc, int si
 
     // Allocate for random array
     tmpAlloc = mallocArrInt(size);
-    if (!isAllocated(tmpAlloc)) {
+    if (!tmpAlloc) {
 
         printf("Allocation error!\n");
         return 1;
@@ -999,6 +1252,83 @@ int generateArraysToFiles(int size) {
     free(arr);
 
     return 1;
+}
+
+// Try to malloc array
+int* mallocArrInt(int desiredSize) {
+
+    int *arr = NULL;
+    arr = (int *) malloc(desiredSize * sizeof(int));
+    return arr ? arr : NULL;
+}
+
+// Print 1D-array of ints
+// 10 items in a row
+void arrPrint(int *arr, int size) {
+
+    int i;
+    for (i = 0; i < size; i++) {
+        printf("%7d", arr[i]);
+        if (i % 10 == 9) {
+            printf("\n");
+        }
+    }
+    printf("\n");
+}
+
+// Fill array with ascending row
+void arrFillAsc(int *arr, int size) {
+
+    srand(time(NULL));
+    int i;
+    for (i = 0; i < size; i++) {
+        arr[i] = i ;
+    }
+}
+
+// Fill array with random numbers
+void arrFillRand(int *arr, int size, int min, int max) {
+
+    srand(time(NULL));
+    int i;
+    for (i = 0; i < size; i++) {
+        arr[i] = rand() % (max - min + 1) + min ;
+    }
+}
+
+// Fill array with ascending row
+void arrFillDesc(int *arr, int size) {
+
+    srand(time(NULL));
+    int i;
+    for (i = 0; i < size; i++) {
+        arr[i] = size - i - 1;
+    }
+}
+
+// Copy array
+void copyArr(int src[], int *dest, int size) {
+
+    int i;
+    for (i = 0; i < size; i++) {
+
+        dest[i] = src[i];
+    }
+}
+
+// Reverse an array
+void reverseArr(int *arr, int size) {
+
+    int tmp;
+    int i;
+
+    for(i = 0; i < size / 2; i++) {
+
+        // Swap
+        tmp = arr[i];
+        arr[i] = arr[size - i - 1];
+        arr[size - i - 1] = tmp;
+    }
 }
 
 // Count lines in file
@@ -1081,9 +1411,35 @@ int arrWriteToFile(int arr[], int size, char *filename) {
     return 0;
 }
 
-int isAllocated(void *ptr) {
+int inputInt(int min, int max) {
 
-    return ptr ? 1 : 0;
+    char numberStr[12];
+
+    while (1) {
+
+        fgets(numberStr, 11, stdin);
+
+        numberStr[strlen(numberStr) - 1] = 0;
+
+        int result = atoi(numberStr);
+
+        if (result >= min && result <= max) {
+
+            return result;
+        }
+        else printf("Please, enter a number between %d and %d:\n", min, max);
+    }
+}
+
+void startTimer() {
+
+    start_t = clock();
+}
+
+double stopTimer() {
+
+    end_t = clock();
+    return (double) (end_t - start_t) / CLOCKS_PER_SEC;
 }
 
 void clrScr() {

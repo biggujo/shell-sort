@@ -1,6 +1,0 @@
-#ifndef SHELL_SORT_COURSE_WORK_MYINPUT_H
-#define SHELL_SORT_COURSE_WORK_MYINPUT_H
-
-int inputInt(int min, int max);
-
-#endif //SHELL_SORT_COURSE_WORK_MYINPUT_H
