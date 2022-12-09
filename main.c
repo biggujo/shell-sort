@@ -28,11 +28,19 @@
 #define FILE_ARRAY_DESC             "ArrayDesc.txt"
 #define FILE_ARRAY_RAND             "ArrayRand.txt"
 
+#define PROGRAM_HEADER "SHELL AND INSERTION COMPARISON TESTS"
+
+#define MIN_ARR 10
+
 typedef struct Array {
 
     int *arr;
     int size;
 } Array;
+
+// For timer
+struct timeval begin;
+struct timeval end;
 
 // Test sort on best, average and worst case
 // Output: CSV's with information about time, comparisons and swaps
@@ -73,7 +81,7 @@ void reverseArr(int *arr, int size);
 // Count lines in file
 int fileCountLines(char *filename);
 // Read int array from text file
-int* arrReadFromFile(int *arr, int *size, char *filename);
+int* arrReadFromFile(int size, char *filename);
 // Read int array to text file
 // Return: 0 - OK, -1 - error
 int arrWriteToFile(int arr[], int size, char *filename);
@@ -85,12 +93,6 @@ double stopTimer();
 
 void pressAnyKey();
 void clrScr();
-
-#define PROGRAM_HEADER "SHELL AND INSERTION COMPARISON TESTS"
-
-// For timer
-clock_t start_t;
-clock_t end_t;
 
 // For tests
 static int comparisons = 0;
@@ -134,7 +136,7 @@ int main(void) {
                 printf("1 - Print sequence of Shell, 1959\n\n");
 
                 printf("Please, enter a size of array:\n");
-                size = inputInt(50, 1000000);
+                size = inputInt(MIN_ARR, 10000);
 
                 clrScr();
 
@@ -163,7 +165,7 @@ int main(void) {
                 printf("2 - Print sequence of Sedgewick, 1982\n\n");
 
                 printf("Please, enter a size of array:\n");
-                size = inputInt(50, 1000000);
+                size = inputInt(MIN_ARR, 10000);
 
                 clrScr();
 
@@ -192,7 +194,7 @@ int main(void) {
                 printf("3 - Print sequence of Sedgewick, 1986\n\n");
 
                 printf("Please, enter a size of array:\n");
-                size = inputInt(50, 1000000);
+                size = inputInt(MIN_ARR, 10000);
 
                 clrScr();
 
@@ -221,7 +223,7 @@ int main(void) {
                 printf("4 - Print sequence of Ciura, 2001\n\n");
 
                 printf("Please, enter a size of array:\n");
-                size = inputInt(50, 701);
+                size = inputInt(MIN_ARR, 701);
 
                 clrScr();
 
@@ -262,7 +264,7 @@ int main(void) {
                 if (tmpSize == 0) {
                     printf("Please, create arrays first!\n");
                 }
-                size = inputInt(50, tmpSize);
+                size = inputInt(MIN_ARR, tmpSize);
 
                 if (!arrAsc && !arrRand && !arrDesc) {
 
@@ -333,7 +335,7 @@ int main(void) {
                 if (tmpSize == 0) {
                     printf("Please, create arrays first!\n");
                 }
-                size = inputInt(50, tmpSize);
+                size = inputInt(MIN_ARR, tmpSize);
 
                 if (!arrAsc && !arrRand && !arrDesc) {
 
@@ -384,7 +386,7 @@ int main(void) {
 
                 printf("Please, enter a size of new arrays:\n");
 
-                size = inputInt(50, 1000000);
+                size = inputInt(MIN_ARR, 10000);
 
                 puts("Generating...");
                 generateArraysToFiles(size);
@@ -416,11 +418,15 @@ int main(void) {
 
 void testShellRowShell1959(Array *arrAsc, Array *arrRand, Array *arrDesc, int size, int step, int *arrCopy) {
 
-    // Passes to do more precise timing if array is small
-    int passes = 100;
-
     // Max "small" array when do more precise timing
-    int maxSmall = 5000;
+    int maxSmall = 1;
+//    int maxSmall = 50000;
+
+    // Passes to do more precise timing if array is small
+    int passes = 10000;
+
+    int compTmp = 0;
+    int swapTmp = 0;
 
     // Counter
     int i;
@@ -455,6 +461,12 @@ void testShellRowShell1959(Array *arrAsc, Array *arrRand, Array *arrDesc, int si
 
     for (k = 0; k <= size; k += step) {
 
+        comparisons = 0;
+        swaps = 0;
+
+        compTmp = 0;
+        swapTmp = 0;
+
         // Create gap
         testGap = rowShell1959(k);
 
@@ -472,6 +484,9 @@ void testShellRowShell1959(Array *arrAsc, Array *arrRand, Array *arrDesc, int si
                 copyArr(arrAsc->arr, &arrCopy[0], k);
 
                 shellSort(&arrCopy[0], k, testGap->arr, testGap->size);
+
+                if (comparisons && !compTmp) compTmp = comparisons;
+                if (swaps) swapTmp = swaps;
             }
             timeResult = stopTimer();
 
@@ -490,11 +505,14 @@ void testShellRowShell1959(Array *arrAsc, Array *arrRand, Array *arrDesc, int si
         }
 
         // Save best to file
-        fprintf_s(fileComp, "%d, ", comparisons);
-        fprintf_s(fileSwap, "%d, ", swaps);
+        fprintf_s(fileComp, "%d, ", compTmp ? compTmp : comparisons);
+        fprintf_s(fileSwap, "%d, ", swapTmp ? swapTmp : swaps);
 
         comparisons = 0;
         swaps = 0;
+        
+        compTmp = 0;
+        swapTmp = 0;
 
         if (size <= maxSmall) {
 
@@ -505,6 +523,9 @@ void testShellRowShell1959(Array *arrAsc, Array *arrRand, Array *arrDesc, int si
                 copyArr(arrRand->arr, &arrCopy[0], k);
 
                 shellSort(&arrCopy[0], k, testGap->arr, testGap->size);
+
+                if (comparisons && !compTmp) compTmp = comparisons;
+                if (swaps) swapTmp = swaps;
             }
             timeResult = stopTimer();
 
@@ -513,7 +534,7 @@ void testShellRowShell1959(Array *arrAsc, Array *arrRand, Array *arrDesc, int si
         else {
 
             // Test average case
-            copyArr(arrAsc->arr, &arrCopy[0], k);
+            copyArr(arrRand->arr, &arrCopy[0], k);
 
             startTimer();
             shellSort(&arrCopy[0], k, testGap->arr, testGap->size);
@@ -523,11 +544,14 @@ void testShellRowShell1959(Array *arrAsc, Array *arrRand, Array *arrDesc, int si
         }
 
         // Save average to file
-        fprintf_s(fileComp, "%d, ", comparisons);
-        fprintf_s(fileSwap, "%d, ", swaps);
+        fprintf_s(fileComp, "%d, ", compTmp ? compTmp : comparisons);
+        fprintf_s(fileSwap, "%d, ", swapTmp ? swapTmp : swaps);
 
         comparisons = 0;
         swaps = 0;
+        
+        compTmp = 0;
+        swapTmp = 0;
 
         if (size <= maxSmall) {
 
@@ -538,6 +562,9 @@ void testShellRowShell1959(Array *arrAsc, Array *arrRand, Array *arrDesc, int si
                 copyArr(arrDesc->arr, &arrCopy[0], k);
 
                 shellSort(&arrCopy[0], k, testGap->arr, testGap->size);
+
+                if (comparisons && !compTmp) compTmp = comparisons;
+                if (swaps) swapTmp = swaps;
             }
             timeResult = stopTimer();
 
@@ -556,11 +583,8 @@ void testShellRowShell1959(Array *arrAsc, Array *arrRand, Array *arrDesc, int si
         }
 
         // Save worst to file
-        fprintf_s(fileComp, "%d\n", comparisons);
-        fprintf_s(fileSwap, "%d\n", swaps);
-
-        comparisons = 0;
-        swaps = 0;
+        fprintf_s(fileComp, "%d\n", compTmp ? compTmp : comparisons);
+        fprintf_s(fileSwap, "%d\n", swapTmp ? swapTmp : swaps);
     }
 
     free(testGap->arr);
@@ -575,11 +599,15 @@ void testShellRowShell1959(Array *arrAsc, Array *arrRand, Array *arrDesc, int si
 
 void testShellRowSedgewick1982(Array *arrAsc, Array *arrRand, Array *arrDesc, int size, int step, int *arrCopy) {
 
-    // Passes to do more precise timing if array is small
-    int passes = 100;
-
     // Max "small" array when do more precise timing
-    int maxSmall = 5000;
+    int maxSmall = 1;
+//    int maxSmall = 50000;
+
+    // Passes to do more precise timing if array is small
+    int passes = 10000;
+
+    int compTmp = 0;
+    int swapTmp = 0;
 
     // Counter
     int i;
@@ -614,6 +642,12 @@ void testShellRowSedgewick1982(Array *arrAsc, Array *arrRand, Array *arrDesc, in
 
     for (k = 0; k <= size; k += step) {
 
+        comparisons = 0;
+        swaps = 0;
+
+        compTmp = 0;
+        swapTmp = 0;
+
         // Create gap
         testGap = rowSedgewick1982(k);
         reverseArr(&testGap->arr[0], testGap->size);
@@ -632,6 +666,9 @@ void testShellRowSedgewick1982(Array *arrAsc, Array *arrRand, Array *arrDesc, in
                 copyArr(arrAsc->arr, &arrCopy[0], k);
 
                 shellSort(&arrCopy[0], k, testGap->arr, testGap->size);
+
+                if (comparisons && !compTmp) compTmp = comparisons;
+                if (swaps) swapTmp = swaps;
             }
             timeResult = stopTimer();
 
@@ -650,11 +687,14 @@ void testShellRowSedgewick1982(Array *arrAsc, Array *arrRand, Array *arrDesc, in
         }
 
         // Save best to file
-        fprintf_s(fileComp, "%d, ", comparisons);
-        fprintf_s(fileSwap, "%d, ", swaps);
+        fprintf_s(fileComp, "%d, ", compTmp ? compTmp : comparisons);
+        fprintf_s(fileSwap, "%d, ", swapTmp ? swapTmp : swaps);
 
         comparisons = 0;
         swaps = 0;
+        
+        compTmp = 0;
+        swapTmp = 0;
 
         if (size <= maxSmall) {
 
@@ -665,6 +705,9 @@ void testShellRowSedgewick1982(Array *arrAsc, Array *arrRand, Array *arrDesc, in
                 copyArr(arrRand->arr, &arrCopy[0], k);
 
                 shellSort(&arrCopy[0], k, testGap->arr, testGap->size);
+
+                if (comparisons && !compTmp) compTmp = comparisons;
+                if (swaps) swapTmp = swaps;
             }
             timeResult = stopTimer();
 
@@ -673,7 +716,7 @@ void testShellRowSedgewick1982(Array *arrAsc, Array *arrRand, Array *arrDesc, in
         else {
 
             // Test average case
-            copyArr(arrAsc->arr, &arrCopy[0], k);
+            copyArr(arrRand->arr, &arrCopy[0], k);
 
             startTimer();
             shellSort(&arrCopy[0], k, testGap->arr, testGap->size);
@@ -683,11 +726,14 @@ void testShellRowSedgewick1982(Array *arrAsc, Array *arrRand, Array *arrDesc, in
         }
 
         // Save average to file
-        fprintf_s(fileComp, "%d, ", comparisons);
-        fprintf_s(fileSwap, "%d, ", swaps);
+        fprintf_s(fileComp, "%d, ", compTmp ? compTmp : comparisons);
+        fprintf_s(fileSwap, "%d, ", swapTmp ? swapTmp : swaps);
 
         comparisons = 0;
         swaps = 0;
+        
+        compTmp = 0;
+        swapTmp = 0;
 
         if (size <= maxSmall) {
 
@@ -698,6 +744,9 @@ void testShellRowSedgewick1982(Array *arrAsc, Array *arrRand, Array *arrDesc, in
                 copyArr(arrDesc->arr, &arrCopy[0], k);
 
                 shellSort(&arrCopy[0], k, testGap->arr, testGap->size);
+
+                if (comparisons && !compTmp) compTmp = comparisons;
+                if (swaps) swapTmp = swaps;
             }
             timeResult = stopTimer();
 
@@ -716,11 +765,8 @@ void testShellRowSedgewick1982(Array *arrAsc, Array *arrRand, Array *arrDesc, in
         }
 
         // Save worst to file
-        fprintf_s(fileComp, "%d\n", comparisons);
-        fprintf_s(fileSwap, "%d\n", swaps);
-
-        comparisons = 0;
-        swaps = 0;
+        fprintf_s(fileComp, "%d\n", compTmp ? compTmp : comparisons);
+        fprintf_s(fileSwap, "%d\n", swapTmp ? swapTmp : swaps);
     }
 
     free(testGap->arr);
@@ -735,11 +781,15 @@ void testShellRowSedgewick1982(Array *arrAsc, Array *arrRand, Array *arrDesc, in
 
 void testShellRowSedgewick1986(Array *arrAsc, Array *arrRand, Array *arrDesc, int size, int step, int *arrCopy) {
 
-    // Passes to do more precise timing if array is small
-    int passes = 100;
-
     // Max "small" array when do more precise timing
-    int maxSmall = 5000;
+    int maxSmall = 1;
+//    int maxSmall = 50000;
+
+    // Passes to do more precise timing if array is small
+    int passes = 10000;
+
+    int compTmp = 0;
+    int swapTmp = 0;
 
     // Counter
     int i;
@@ -774,6 +824,12 @@ void testShellRowSedgewick1986(Array *arrAsc, Array *arrRand, Array *arrDesc, in
 
     for (k = 0; k <= size; k += step) {
 
+        comparisons = 0;
+        swaps = 0;
+
+        compTmp = 0;
+        swapTmp = 0;
+
         // Create gap
         testGap = rowSedgewick1986(k);
         reverseArr(&testGap->arr[0], testGap->size);
@@ -792,6 +848,9 @@ void testShellRowSedgewick1986(Array *arrAsc, Array *arrRand, Array *arrDesc, in
                 copyArr(arrAsc->arr, &arrCopy[0], k);
 
                 shellSort(&arrCopy[0], k, testGap->arr, testGap->size);
+
+                if (comparisons && !compTmp) compTmp = comparisons;
+                if (swaps) swapTmp = swaps;
             }
             timeResult = stopTimer();
 
@@ -810,11 +869,14 @@ void testShellRowSedgewick1986(Array *arrAsc, Array *arrRand, Array *arrDesc, in
         }
 
         // Save best to file
-        fprintf_s(fileComp, "%d, ", comparisons);
-        fprintf_s(fileSwap, "%d, ", swaps);
+        fprintf_s(fileComp, "%d, ", compTmp ? compTmp : comparisons);
+        fprintf_s(fileSwap, "%d, ", swapTmp ? swapTmp : swaps);
 
         comparisons = 0;
         swaps = 0;
+        
+        compTmp = 0;
+        swapTmp = 0;
 
         if (size <= maxSmall) {
 
@@ -825,6 +887,9 @@ void testShellRowSedgewick1986(Array *arrAsc, Array *arrRand, Array *arrDesc, in
                 copyArr(arrRand->arr, &arrCopy[0], k);
 
                 shellSort(&arrCopy[0], k, testGap->arr, testGap->size);
+
+                if (comparisons && !compTmp) compTmp = comparisons;
+                if (swaps) swapTmp = swaps;
             }
             timeResult = stopTimer();
 
@@ -833,7 +898,7 @@ void testShellRowSedgewick1986(Array *arrAsc, Array *arrRand, Array *arrDesc, in
         else {
 
             // Test average case
-            copyArr(arrAsc->arr, &arrCopy[0], k);
+            copyArr(arrRand->arr, &arrCopy[0], k);
 
             startTimer();
             shellSort(&arrCopy[0], k, testGap->arr, testGap->size);
@@ -843,11 +908,14 @@ void testShellRowSedgewick1986(Array *arrAsc, Array *arrRand, Array *arrDesc, in
         }
 
         // Save average to file
-        fprintf_s(fileComp, "%d, ", comparisons);
-        fprintf_s(fileSwap, "%d, ", swaps);
+        fprintf_s(fileComp, "%d, ", compTmp ? compTmp : comparisons);
+        fprintf_s(fileSwap, "%d, ", swapTmp ? swapTmp : swaps);
 
         comparisons = 0;
         swaps = 0;
+        
+        compTmp = 0;
+        swapTmp = 0;
 
         if (size <= maxSmall) {
 
@@ -858,6 +926,9 @@ void testShellRowSedgewick1986(Array *arrAsc, Array *arrRand, Array *arrDesc, in
                 copyArr(arrDesc->arr, &arrCopy[0], k);
 
                 shellSort(&arrCopy[0], k, testGap->arr, testGap->size);
+
+                if (comparisons && !compTmp) compTmp = comparisons;
+                if (swaps) swapTmp = swaps;
             }
             timeResult = stopTimer();
 
@@ -876,11 +947,8 @@ void testShellRowSedgewick1986(Array *arrAsc, Array *arrRand, Array *arrDesc, in
         }
 
         // Save worst to file
-        fprintf_s(fileComp, "%d\n", comparisons);
-        fprintf_s(fileSwap, "%d\n", swaps);
-
-        comparisons = 0;
-        swaps = 0;
+        fprintf_s(fileComp, "%d\n", compTmp ? compTmp : comparisons);
+        fprintf_s(fileSwap, "%d\n", swapTmp ? swapTmp : swaps);
     }
 
     free(testGap->arr);
@@ -895,11 +963,15 @@ void testShellRowSedgewick1986(Array *arrAsc, Array *arrRand, Array *arrDesc, in
 
 void testShellRowCiura2001(Array *arrAsc, Array *arrRand, Array *arrDesc, int size, int step, int *arrCopy) {
 
-    // Passes to do more precise timing if array is small
-    int passes = 100;
-
     // Max "small" array when do more precise timing
-    int maxSmall = 5000;
+    int maxSmall = 1;
+//    int maxSmall = 50000;
+
+    // Passes to do more precise timing if array is small
+    int passes = 10000;
+
+    int compTmp = 0;
+    int swapTmp = 0;
 
     // Counter
     int i;
@@ -934,6 +1006,12 @@ void testShellRowCiura2001(Array *arrAsc, Array *arrRand, Array *arrDesc, int si
 
     for (k = 0; k <= size; k += step) {
 
+        comparisons = 0;
+        swaps = 0;
+
+        compTmp = 0;
+        swapTmp = 0;
+
         // Create gap
         testGap = rowCiura2001(k);
         reverseArr(&testGap->arr[0], testGap->size);
@@ -952,6 +1030,9 @@ void testShellRowCiura2001(Array *arrAsc, Array *arrRand, Array *arrDesc, int si
                 copyArr(arrAsc->arr, &arrCopy[0], k);
 
                 shellSort(&arrCopy[0], k, testGap->arr, testGap->size);
+
+                if (comparisons && !compTmp) compTmp = comparisons;
+                if (swaps) swapTmp = swaps;
             }
             timeResult = stopTimer();
 
@@ -970,11 +1051,14 @@ void testShellRowCiura2001(Array *arrAsc, Array *arrRand, Array *arrDesc, int si
         }
 
         // Save best to file
-        fprintf_s(fileComp, "%d, ", comparisons);
-        fprintf_s(fileSwap, "%d, ", swaps);
+        fprintf_s(fileComp, "%d, ", compTmp ? compTmp : comparisons);
+        fprintf_s(fileSwap, "%d, ", swapTmp ? swapTmp : swaps);
 
         comparisons = 0;
         swaps = 0;
+        
+        compTmp = 0;
+        swapTmp = 0;
 
         if (size <= maxSmall) {
 
@@ -985,6 +1069,9 @@ void testShellRowCiura2001(Array *arrAsc, Array *arrRand, Array *arrDesc, int si
                 copyArr(arrRand->arr, &arrCopy[0], k);
 
                 shellSort(&arrCopy[0], k, testGap->arr, testGap->size);
+
+                if (comparisons && !compTmp) compTmp = comparisons;
+                if (swaps) swapTmp = swaps;
             }
             timeResult = stopTimer();
 
@@ -993,7 +1080,7 @@ void testShellRowCiura2001(Array *arrAsc, Array *arrRand, Array *arrDesc, int si
         else {
 
             // Test average case
-            copyArr(arrAsc->arr, &arrCopy[0], k);
+            copyArr(arrRand->arr, &arrCopy[0], k);
 
             startTimer();
             shellSort(&arrCopy[0], k, testGap->arr, testGap->size);
@@ -1003,11 +1090,14 @@ void testShellRowCiura2001(Array *arrAsc, Array *arrRand, Array *arrDesc, int si
         }
 
         // Save average to file
-        fprintf_s(fileComp, "%d, ", comparisons);
-        fprintf_s(fileSwap, "%d, ", swaps);
+        fprintf_s(fileComp, "%d, ", compTmp ? compTmp : comparisons);
+        fprintf_s(fileSwap, "%d, ", swapTmp ? swapTmp : swaps);
 
         comparisons = 0;
         swaps = 0;
+        
+        compTmp = 0;
+        swapTmp = 0;
 
         if (size <= maxSmall) {
 
@@ -1018,6 +1108,9 @@ void testShellRowCiura2001(Array *arrAsc, Array *arrRand, Array *arrDesc, int si
                 copyArr(arrDesc->arr, &arrCopy[0], k);
 
                 shellSort(&arrCopy[0], k, testGap->arr, testGap->size);
+
+                if (comparisons && !compTmp) compTmp = comparisons;
+                if (swaps) swapTmp = swaps;
             }
             timeResult = stopTimer();
 
@@ -1036,11 +1129,8 @@ void testShellRowCiura2001(Array *arrAsc, Array *arrRand, Array *arrDesc, int si
         }
 
         // Save worst to file
-        fprintf_s(fileComp, "%d\n", comparisons);
-        fprintf_s(fileSwap, "%d\n", swaps);
-
-        comparisons = 0;
-        swaps = 0;
+        fprintf_s(fileComp, "%d\n", compTmp ? compTmp : comparisons);
+        fprintf_s(fileSwap, "%d\n", swapTmp ? swapTmp : swaps);
     }
 
     free(testGap->arr);
@@ -1055,11 +1145,15 @@ void testShellRowCiura2001(Array *arrAsc, Array *arrRand, Array *arrDesc, int si
 
 void testInsertionSort(Array *arrAsc, Array *arrRand, Array *arrDesc, int size, int step, int *arrCopy) {
 
-    // Passes to do more precise timing if array is small
-    int passes = 100;
-
     // Max "small" array when do more precise timing
     int maxSmall = 10000;
+
+    // Passes to do more precise timing if array is small
+//    int passes = maxSmall > 20000 ? 10 : 100;
+    int passes = size > 5000 ? 10 : 100000;
+
+    int compTmp = 0;
+    int swapTmp = 0;
 
     // Counter
     int i;
@@ -1092,6 +1186,12 @@ void testInsertionSort(Array *arrAsc, Array *arrRand, Array *arrDesc, int size, 
 
     for (k = 0; k <= size; k += step) {
 
+        comparisons = 0;
+        swaps = 0;
+
+        compTmp = 0;
+        swapTmp = 0;
+
         // Save size to files
         fprintf_s(fileTime, "%d, ", k);
         fprintf_s(fileComp, "%d, ", k);
@@ -1106,6 +1206,9 @@ void testInsertionSort(Array *arrAsc, Array *arrRand, Array *arrDesc, int size, 
                 copyArr(arrAsc->arr, &arrCopy[0], k);
 
                 insertionSort(&arrCopy[0], k);
+
+                if (comparisons && !compTmp) compTmp = comparisons;
+                if (swaps) swapTmp = swaps;
             }
             timeResult = stopTimer();
 
@@ -1124,11 +1227,14 @@ void testInsertionSort(Array *arrAsc, Array *arrRand, Array *arrDesc, int size, 
         }
 
         // Save best to file
-        fprintf_s(fileComp, "%d, ", comparisons);
-        fprintf_s(fileSwap, "%d, ", swaps);
+        fprintf_s(fileComp, "%d, ", compTmp ? compTmp : comparisons);
+        fprintf_s(fileSwap, "%d, ", swapTmp ? swapTmp : swaps);
 
         comparisons = 0;
         swaps = 0;
+        
+        compTmp = 0;
+        swapTmp = 0;
 
         if (size <= maxSmall) {
 
@@ -1139,6 +1245,9 @@ void testInsertionSort(Array *arrAsc, Array *arrRand, Array *arrDesc, int size, 
                 copyArr(arrRand->arr, &arrCopy[0], k);
 
                 insertionSort(&arrCopy[0], k);
+
+                if (comparisons && !compTmp) compTmp = comparisons;
+                if (swaps) swapTmp = swaps;
             }
             timeResult = stopTimer();
 
@@ -1147,7 +1256,7 @@ void testInsertionSort(Array *arrAsc, Array *arrRand, Array *arrDesc, int size, 
         else {
 
             // Test average case
-            copyArr(arrAsc->arr, &arrCopy[0], k);
+            copyArr(arrRand->arr, &arrCopy[0], k);
 
             startTimer();
             insertionSort(&arrCopy[0], k);
@@ -1157,11 +1266,14 @@ void testInsertionSort(Array *arrAsc, Array *arrRand, Array *arrDesc, int size, 
         }
 
         // Save average to file
-        fprintf_s(fileComp, "%d, ", comparisons);
-        fprintf_s(fileSwap, "%d, ", swaps);
+        fprintf_s(fileComp, "%d, ", compTmp ? compTmp : comparisons);
+        fprintf_s(fileSwap, "%d, ", swapTmp ? swapTmp : swaps);
 
         comparisons = 0;
         swaps = 0;
+        
+        compTmp = 0;
+        swapTmp = 0;
 
         if (size <= maxSmall) {
 
@@ -1172,6 +1284,9 @@ void testInsertionSort(Array *arrAsc, Array *arrRand, Array *arrDesc, int size, 
                 copyArr(arrDesc->arr, &arrCopy[0], k);
 
                 insertionSort(&arrCopy[0], k);
+
+                if (!compTmp && comparisons) compTmp = comparisons;
+                if (!swapTmp && swaps) swapTmp = swaps;
             }
             timeResult = stopTimer();
 
@@ -1190,11 +1305,8 @@ void testInsertionSort(Array *arrAsc, Array *arrRand, Array *arrDesc, int size, 
         }
 
         // Save worst to file
-        fprintf_s(fileComp, "%d\n", comparisons);
-        fprintf_s(fileSwap, "%d\n", swaps);
-
-        comparisons = 0;
-        swaps = 0;
+        fprintf_s(fileComp, "%d\n", compTmp ? compTmp : comparisons);
+        fprintf_s(fileSwap, "%d\n", swapTmp ? swapTmp : swaps);
     }
 
     fclose(fileTime);
@@ -1248,8 +1360,6 @@ void shellSort(int *arr, int size, const int gapArr[], int gapArrSize) {
 
             comparisons++;
 
-            swaps++;
-
             // Recover saved item
             arr[k] = tmp;
         }
@@ -1272,7 +1382,7 @@ Array *rowShell1959(int size) {
 
     int i;
     int num;
-    for (i = 0, num = size / 2; num > 0; num /= 2, i++) {
+    for (i = 0, num = (size == 1) ? size : size / 2; num > 0; num /= 2, i++) {
 
         if (i == curSize) {
 
@@ -1438,8 +1548,6 @@ void insertionSort(int arr[], int size) {
 
         comparisons++;
 
-        swaps++;
-
         // Recover saved item in the correct position
         arr[j + 1] = key;
     }
@@ -1462,47 +1570,24 @@ int readArraysFromFiles(Array **arrAsc, Array **arrRand, Array **arrDesc, int si
 
     int *tmpAlloc = NULL;
 
-    tmpAlloc = NULL;
-
     // Allocate array by ascending
-    tmpAlloc = (int *) malloc(size * sizeof(int));
-    if (!tmpAlloc) {
-
-        printf("Allocation error!\n");
-        return 1;
-    }
-
-    arrReadFromFile(tmpAlloc, &size, FILE_ARRAY_ASC);
+    tmpAlloc = arrReadFromFile(size, FILE_ARRAY_ASC);
 
     // Save pointer
     (*arrAsc)->arr = tmpAlloc;
 
     tmpAlloc = NULL;
 
-    // Allocate array by ascending
-    tmpAlloc = (int *) malloc(size * sizeof(int));
-    if (!tmpAlloc) {
-
-        printf("Allocation error!\n");
-        return 1;
-    }
-
-    arrReadFromFile(tmpAlloc, &size, FILE_ARRAY_DESC);
+    // Allocate array by descending
+    tmpAlloc = arrReadFromFile(size, FILE_ARRAY_DESC);
 
     // Save pointer
     (*arrDesc)->arr = tmpAlloc;
 
     tmpAlloc = NULL;
 
-    // Allocate for random array
-    tmpAlloc = (int *) malloc(size * sizeof(int));
-    if (!tmpAlloc) {
-
-        printf("Allocation error!\n");
-        return 1;
-    }
-
-    arrReadFromFile(tmpAlloc, &size, FILE_ARRAY_RAND);
+    // Allocate random array
+    tmpAlloc = arrReadFromFile(size, FILE_ARRAY_RAND);
 
     // Save pointer
     (*arrRand)->arr = tmpAlloc;
@@ -1648,7 +1733,9 @@ int fileCountLines(char *filename) {
 
 // Read int array from text file
 // Return: arr or NULL
-int* arrReadFromFile(int *arr, int *size, char *filename) {
+int* arrReadFromFile(int size, char *filename) {
+
+    int *arr = NULL;
 
     // Try to open file
     FILE *fp = NULL;
@@ -1657,19 +1744,14 @@ int* arrReadFromFile(int *arr, int *size, char *filename) {
     // If opened
     if (!fp) return NULL;
 
-    int *tmp;
     int lines = fileCountLines(filename);
 
     // Reallocate to proper size
-    if ((tmp = (int *) realloc(arr, sizeof(int) * lines)) != NULL) {
-
-        *size = lines;
-
-        arr = tmp;
+    if ((arr = (int *) realloc(arr, sizeof(int) * lines)) != NULL) {
 
         // Fill from file
         int i;
-        for (i = 0; i < lines; ++i) {
+        for (i = 0; i < lines && i < size; i++) {
 
             fscanf(fp, "%d", &arr[i]);
         }
@@ -1722,13 +1804,16 @@ int inputInt(int min, int max) {
 
 void startTimer() {
 
-    start_t = clock();
+    gettimeofday(&begin, 0);
 }
 
+// Return time in ms
 double stopTimer() {
 
-    end_t = clock();
-    return (double) (end_t - start_t) / CLOCKS_PER_SEC;
+    gettimeofday(&end, 0);
+    long seconds = end.tv_sec - begin.tv_sec;
+    long microseconds = end.tv_usec - begin.tv_usec;
+    return seconds * 1000 + (double) microseconds / 1000;
 }
 
 void clrScr() {
