@@ -133,10 +133,14 @@ int main(void) {
 
                 clrScr();
 
-                printf("1 - Print sequence of Shell, 1959\n\n");
+                printf("1 - Print 1sequence of Shell, 1959\n\n");
 
                 printf("Please, enter a size of array:\n");
-                size = inputInt(MIN_ARR, 10000);
+                tmpSize = fileCountLines(FILE_ARRAY_RAND);
+                if (tmpSize == 0) {
+                    printf("Please, create arrays first!\n");
+                }
+                size = inputInt(MIN_ARR, tmpSize);
 
                 clrScr();
 
@@ -165,7 +169,11 @@ int main(void) {
                 printf("2 - Print sequence of Sedgewick, 1982\n\n");
 
                 printf("Please, enter a size of array:\n");
-                size = inputInt(MIN_ARR, 10000);
+                tmpSize = fileCountLines(FILE_ARRAY_RAND);
+                if (tmpSize == 0) {
+                    printf("Please, create arrays first!\n");
+                }
+                size = inputInt(MIN_ARR, tmpSize);
 
                 clrScr();
 
@@ -194,7 +202,11 @@ int main(void) {
                 printf("3 - Print sequence of Sedgewick, 1986\n\n");
 
                 printf("Please, enter a size of array:\n");
-                size = inputInt(MIN_ARR, 10000);
+                tmpSize = fileCountLines(FILE_ARRAY_RAND);
+                if (tmpSize == 0) {
+                    printf("Please, create arrays first!\n");
+                }
+                size = inputInt(MIN_ARR, tmpSize);
 
                 clrScr();
 
@@ -419,11 +431,10 @@ int main(void) {
 void testShellRowShell1959(Array *arrAsc, Array *arrRand, Array *arrDesc, int size, int step, int *arrCopy) {
 
     // Max "small" array when do more precise timing
-    int maxSmall = 1;
-//    int maxSmall = 50000;
+    int maxSmall = 10000;
 
     // Passes to do more precise timing if array is small
-    int passes = 10000;
+    int passes = size > 5000 ? 10 : 100000;
 
     int compTmp = 0;
     int swapTmp = 0;
@@ -600,11 +611,10 @@ void testShellRowShell1959(Array *arrAsc, Array *arrRand, Array *arrDesc, int si
 void testShellRowSedgewick1982(Array *arrAsc, Array *arrRand, Array *arrDesc, int size, int step, int *arrCopy) {
 
     // Max "small" array when do more precise timing
-    int maxSmall = 1;
-//    int maxSmall = 50000;
+    int maxSmall = 10000;
 
     // Passes to do more precise timing if array is small
-    int passes = 10000;
+    int passes = size > 5000 ? 10 : 100000;
 
     int compTmp = 0;
     int swapTmp = 0;
@@ -782,11 +792,10 @@ void testShellRowSedgewick1982(Array *arrAsc, Array *arrRand, Array *arrDesc, in
 void testShellRowSedgewick1986(Array *arrAsc, Array *arrRand, Array *arrDesc, int size, int step, int *arrCopy) {
 
     // Max "small" array when do more precise timing
-    int maxSmall = 1;
-//    int maxSmall = 50000;
+    int maxSmall = 10000;
 
     // Passes to do more precise timing if array is small
-    int passes = 10000;
+    int passes = size > 5000 ? 10 : 100000;
 
     int compTmp = 0;
     int swapTmp = 0;
@@ -964,11 +973,10 @@ void testShellRowSedgewick1986(Array *arrAsc, Array *arrRand, Array *arrDesc, in
 void testShellRowCiura2001(Array *arrAsc, Array *arrRand, Array *arrDesc, int size, int step, int *arrCopy) {
 
     // Max "small" array when do more precise timing
-    int maxSmall = 1;
-//    int maxSmall = 50000;
+    int maxSmall = 10000;
 
     // Passes to do more precise timing if array is small
-    int passes = 10000;
+    int passes = size > 5000 ? 10 : 100000;
 
     int compTmp = 0;
     int swapTmp = 0;
@@ -1149,7 +1157,6 @@ void testInsertionSort(Array *arrAsc, Array *arrRand, Array *arrDesc, int size, 
     int maxSmall = 10000;
 
     // Passes to do more precise timing if array is small
-//    int passes = maxSmall > 20000 ? 10 : 100;
     int passes = size > 5000 ? 10 : 100000;
 
     int compTmp = 0;
