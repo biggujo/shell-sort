@@ -1,0 +1,3 @@
+D:/university/github/shell-sort-course-work/cmake-build-debug/CMakeFiles/shell_sort_course_work.dir
+D:/university/github/shell-sort-course-work/cmake-build-debug/CMakeFiles/edit_cache.dir
+D:/university/github/shell-sort-course-work/cmake-build-debug/CMakeFiles/rebuild_cache.dir

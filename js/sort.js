@@ -1,6 +1,10 @@
 const printArray = (arr) => {
   let n = arr.length;
-  for (let i = 0; i < n; ++i) document.write(arr[i] + " ");
+
+  arr.forEach((element) => {
+    document.write(element + " ");
+  });
+
   document.write("<br>");
 };
 
